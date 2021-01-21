@@ -1,0 +1,1 @@
+keytool -export -alias webservice -keystore server_keystore.ks -file server.cer

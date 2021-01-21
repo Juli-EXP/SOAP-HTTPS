@@ -1,0 +1,1 @@
+keytool -genkey -alias webservice -keyalg rsa -keystore server_keystore.ks

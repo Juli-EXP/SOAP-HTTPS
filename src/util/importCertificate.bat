@@ -1,0 +1,1 @@
+keytool -import -alias webservice -keystore client_truststore.ks -file server.cer
