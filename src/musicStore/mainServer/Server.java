@@ -1,5 +1,6 @@
 package musicStore.mainServer;
 
+import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
@@ -15,7 +16,9 @@ import java.util.ArrayList;
 
 public class Server {
     private static final ArrayList<Band> bands = new ArrayList<>();
-    public static void main(String[] args){
+    private static boolean auth = false;    //Set this to true to enable authentication
+
+    public static void main(String[] args) {
         setupBands();
 
         //startHttpServer();
@@ -24,25 +27,35 @@ public class Server {
         System.out.println("Server available");
     }
 
-    private static void startHttpServer(){
+    private static void startHttpServer() {
         Endpoint.publish("http://localhost:12345/MusicStore", new MusicStoreImpl(bands));
     }
 
-    private static void startHttpsServer(){
+    private static void startHttpsServer() {
         try {
             HttpsServer httpsServer = createHttpsServer();
 
             HttpContext httpContext = httpsServer.createContext("/MusicStore");
+
+            if(auth){
+                httpContext.setAuthenticator(new BasicAuthenticator("get") {
+                    @Override
+                    public boolean checkCredentials(String user, String password) {
+                        return user.equals("lampi") && password.equals("password");
+                    }
+                });
+            }
+
             Endpoint endpoint = Endpoint.create(new MusicStoreImpl(bands));
             endpoint.publish(httpContext);
 
             httpsServer.start();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static HttpsServer createHttpsServer() throws Exception{
+    private static HttpsServer createHttpsServer() throws Exception {
         //Create Keystore
         char[] keystorePassword = "password".toCharArray();
         KeyStore keyStore = KeyStore.getInstance("JKS");
@@ -62,7 +75,7 @@ public class Server {
         return httpsServer;
     }
 
-    private static void setupBands(){
+    private static void setupBands() {
         Band band1 = new Band("Metallica");
         Band band2 = new Band("Slayer");
 
